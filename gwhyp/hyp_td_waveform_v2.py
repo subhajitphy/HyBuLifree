@@ -30,14 +30,15 @@ def get_hyp_waveform(M,q,et0,b,delta_t,inc,distance,order,flow='None'):
     u_i=get_u(l_i,et0,eta,b,3)
     y0=[et0,n0,u_i]
     sol=solve_rr(eta,b,y0,t_i,t_f,t_arr)
-    u_method1=sol[2]
+    earr,narr,uarr=sol
     
     step=len(tarr)
     hp_arr=np.zeros(step)
     hx_arr=np.zeros(step)
     for i in range(step):
-        et=et0
-        u=u_method1[i]
+        et=earr[i]
+        x=narr[i]**(2/3)
+        u=uarr[i]
         x=get_x(et0,eta,b,order)[0]   
         phi=phiv(eta,et,u,x,order)
         r1=rx(eta,et,u,x,order)
@@ -52,13 +53,21 @@ def get_hyp_waveform(M,q,et0,b,delta_t,inc,distance,order,flow='None'):
     Hx=TimeSeries(hx_arr/scale, delta_t=delta_t, epoch=-ti)
 
     Sp=Hp-Hp[0];Sx=Hx-Hx[0]
+    #Sp=Hp;Sx=Hx
 
-    if flow!='None':
+    
+
+    if flow=='None':
+        return Sp, Sx
+    else:
         Sp1=pycbc.filter.highpass(Sp, flow)
         Sx1=pycbc.filter.highpass(Sx, flow)
         return Sp1,Sx1
-    else:
-        return Sp, Sx
+
+    
+    
+
+
 
 
 
